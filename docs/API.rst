@@ -21,6 +21,7 @@ Client
             password: null,
             port: 6667,
             localAddress: null,
+            localPort: null,
             debug: false,
             showErrors: false,
             channels: [],
@@ -53,6 +54,8 @@ Client
 
 
     ``localAddress`` is the address to bind to when connecting.
+
+    `localPort` is the local port to bind when connecting, such as `50555`
 
     ``debug`` will output timestamped messages to the console using ``util.log`` when certain events are fired. If this is true, it will override ``showErrors``.
 
