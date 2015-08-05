@@ -2,7 +2,6 @@
 
 var irc  = require('./lib/irc.js');
 var util = require('util');
-var color = require('ansi-color').set;
 
 var ircServer = process.argv[2] || process.env.IRCSERVER || 'localhost';
 
@@ -20,9 +19,9 @@ var c = new irc.Client(
 var messages = [];
 c.addListener('raw', function(message) { messages.push(message); });
 c.addListener('unhandled', function(message) {
-  console.log(color('unhandled: ', 'red'), message);
+  console.log('unhandled: ', message);
 });
-c.addListener('error', function(message) { console.log(color('error: ', 'red'), message); });
+c.addListener('error', function(message) { console.log('error: ', message); });
 
 function printRecent(number) {
   number = number || 1;
