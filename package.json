@@ -26,7 +26,8 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "irc-colors": "^1.1.0"
+    "irc-colors": "^1.1.0",
+    "shuffle-list": "^1.0.0"
   },
   "optionalDependencies": {
     "chardet": "^0.7.0",
