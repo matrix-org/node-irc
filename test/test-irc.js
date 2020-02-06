@@ -27,11 +27,6 @@ function runTests(t, isSecure, useSecureObject) {
     if (isSecure && useSecureObject) {
         client = new irc.Client('notlocalhost', 'testbot', {
             secure: true,
-            // {
-            //     host: 'localhost',
-            //     port: port,
-            //     rejectUnauthorized: false
-            // },
             selfSigned: true,
             retryCount: 0,
             debug: true
