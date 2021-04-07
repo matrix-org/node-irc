@@ -176,6 +176,31 @@
             "input": "abc abcdef abc abcd abc",
             "maxLength": 5,
             "result": ["abc", "abcde", "f abc", "abcd", "abc"]
-        }
+        },
+        {
+            "input": "éé abc abc",
+            "maxLength": 5,
+            "result": ["éé", "abc", "abc"]
+        },
+        {
+            "input": "ééé ab abc",
+            "maxLength": 5,
+            "result": ["éé", "é ab", "abc"]
+        },
+        {
+            "input": "\ud83d\ude03 ab abc",
+            "maxLength": 5,
+            "result": ["\ud83d\ude03", "ab", "abc"]
+        },
+        {
+            "input": "abc\ud83d\ude03abc",
+            "maxLength": 5,
+            "result": ["abc", "\ud83d\ude03a", "bc"]
+        },
+        {
+            "input": "\ud83d\ude03\ud83d\ude03 ab abc",
+            "maxLength": 5,
+            "result": ["\ud83d\ude03", "\ud83d\ude03", "ab", "abc"]
+        },
     ]
 }
