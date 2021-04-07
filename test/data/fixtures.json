@@ -201,6 +201,6 @@
             "input": "\ud83d\ude03\ud83d\ude03 ab abc",
             "maxLength": 5,
             "result": ["\ud83d\ude03", "\ud83d\ude03", "ab", "abc"]
-        },
+        }
     ]
 }
