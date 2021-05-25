@@ -318,8 +318,7 @@ export class Client extends EventEmitter {
 
     private onReplyISupport(message: Message) {
         message.args.forEach((arg) => {
-            let match;
-            match = arg.match(/([A-Z]+)=(.*)/);
+            let match = arg.match(/([A-Z]+)=(.*)/);
             if (!match) {
                 return;
             }
