@@ -143,12 +143,12 @@ interface IrcSupported {
     channel: {
         idlength: {[key: string]: string};
         length: number;
-        limit: {[key: string]: number};
+        limit: {[key: string]: number|undefined};
         modes: { a: string; b: string; c: string; d: string;},
         types: string;
     };
-    maxlist: {[key: string]: number};
-    maxtargets:{[key: string]: number};
+    maxlist: {[key: string]: number|undefined};
+    maxtargets:{[key: string]: number|undefined};
     modes: number;
     nicklength: number;
     topiclength: number;
@@ -334,7 +334,7 @@ export class Client extends EventEmitter {
                 case 'CHANLIMIT':
                     value.split(',').forEach((val) => {
                         const [val0, val1] = val.split(':');
-                        this.supportedState.channel.limit[val0] = parseInt(val1);
+                        this.supportedState.channel.limit[val0] = parseInt(val1) ?? undefined;
                     });
                     break;
                 case 'CHANMODES': {
@@ -349,7 +349,7 @@ export class Client extends EventEmitter {
                     this.supportedState.channel.types = value;
                     break;
                 case 'CHANNELLEN':
-                    this.supportedState.channel.length = parseInt(value);
+                    this.supportedState.channel.length = parseInt(value) ?? undefined;
                     break;
                 case 'IDCHAN':
                     value.split(',').forEach((val) => {
@@ -358,16 +358,16 @@ export class Client extends EventEmitter {
                     });
                     break;
                 case 'KICKLEN':
-                    this.supportedState.kicklength = parseInt(value);
+                    this.supportedState.kicklength = parseInt(value) ?? undefined;
                     break;
                 case 'MAXLIST':
                     value.split(',').forEach((val) => {
                         const [val0, val1] = val.split(':');
-                        this.supportedState.maxlist[val0] = parseInt(val1);
+                        this.supportedState.maxlist[val0] = parseInt(val1) ?? undefined;
                     });
                     break;
                 case 'NICKLEN':
-                    this.supportedState.nicklength = parseInt(value);
+                    this.supportedState.nicklength = parseInt(value) ?? undefined;
                     break;
                 case 'PREFIX': {
                     match = value.match(/\((.*?)\)(.*)/);
@@ -394,7 +394,7 @@ export class Client extends EventEmitter {
                 case 'TARGMAX': {
                     value.split(',').forEach((val) => {
                         const [key, v] = val.split(':');
-                        const targValue = v ?? parseInt(v);
+                        const targValue = v ?? parseInt(v) ?? undefined;
                         if (typeof targValue === 'number') {
                             this.supportedState.maxtargets[key] = targValue;
                         }
@@ -842,7 +842,7 @@ export class Client extends EventEmitter {
         // the BNF for nicks (first char must be A-Z, length limits, etc). We also
         // want to be able to debug any issues if people say that they didn't get
         // the nick they wanted.
-        const rndNick = "enick_" + Math.floor(Math.random() * 1000) // random 3 digits
+        const rndNick = "enick_" + Math.floor(Math.random() * 1000) // Up to 3 random digits
         this._send('NICK', rndNick);
         this.currentNick = rndNick;
         this._updateMaxLineLength();
