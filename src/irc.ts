@@ -318,8 +318,7 @@ export class Client extends EventEmitter {
 
     private onReplyISupport(message: Message) {
         message.args.forEach((arg) => {
-            let match;
-            match = arg.match(/([A-Z]+)=(.*)/);
+            let match = arg.match(/([A-Z]+)=(.*)/);
             if (!match) {
                 return;
             }
@@ -842,7 +841,7 @@ export class Client extends EventEmitter {
         // the BNF for nicks (first char must be A-Z, length limits, etc). We also
         // want to be able to debug any issues if people say that they didn't get
         // the nick they wanted.
-        const rndNick = "enick_" + Math.floor(Math.random() * 1000) // random 3 digits
+        const rndNick = "enick_" + Math.floor(Math.random() * 1000) // Up to 3 random digits
         this._send('NICK', rndNick);
         this.currentNick = rndNick;
         this._updateMaxLineLength();
