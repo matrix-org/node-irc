@@ -321,7 +321,7 @@ export class Client extends EventEmitter {
     private onCapsConfirmed() {
         if (!this.opt.sasl) {
             // We're not going to authenticate, so we can END.
-            this.send('CAP END');
+            this.send('CAP', 'END');
             return;
         }
         // otherwise, we should authenticate
