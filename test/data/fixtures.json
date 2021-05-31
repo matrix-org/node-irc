@@ -1,9 +1,9 @@
 {
 	"basic": {
 		"sent": [
+			["CAP LS 302", "Client sent CAP request"],
 			["NICK testbot", "Client sent NICK message"],
 			["USER nodebot 8 * :nodeJS IRC client", "Client sent USER message"],
-			["CAP LS 302", "Client sent CAP request"],
 			["QUIT :node-irc says goodbye", "Client sent QUIT message"]
 		],
 
@@ -13,9 +13,9 @@
 	},
 	"double-CRLF": {
 		"sent": [
+			["CAP LS 302", "Client sent CAP request"],
 			["NICK testbot", "Client sent NICK message"],
 			["USER nodebot 8 * :nodeJS IRC client", "Client sent USER message"],
-			["CAP LS 302", "Client sent CAP request"],
 			["QUIT :node-irc says goodbye", "Client sent QUIT message"]
 		],
 
@@ -134,9 +134,9 @@
 	},
 	"433-before-001": {
 		"sent": [
+			["CAP LS 302", "Client sent CAP request"],
 			["NICK testbot", "Client sent NICK message"],
 			["USER nodebot 8 * :nodeJS IRC client", "Client sent USER message"],
-			["CAP LS 302", "Client sent CAP request"],
 			["NICK testbot1", "Client sent proper response to 433 nickname in use message"],
 			["QUIT :node-irc says goodbye", "Client sent QUIT message"]
 		],
