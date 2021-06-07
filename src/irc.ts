@@ -352,6 +352,10 @@ export class Client extends EventEmitter {
             this.emit('registered');
         }
         this.whois(this.nick, (args) => {
+            if (!args) {
+                // TODO: We can't find our own nick!?!
+                throw Error('Failed to whois self');
+            }
             this.currentNick = args.nick;
             this.hostMask = args.user + "@" + args.host;
             this._updateMaxLineLength();
