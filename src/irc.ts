@@ -351,7 +351,7 @@ export class Client extends EventEmitter {
             // If this connection is using SASL, we don't want to emit this until they are authenticated.
             this.emit('registered');
         }
-        this.whois(this.nick, (args) => {
+        this.whois(this.currentNick, (args) => {
             if (!args) {
                 // TODO: We can't find our own nick!?!
                 throw Error('Failed to whois self');
