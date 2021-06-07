@@ -1458,9 +1458,14 @@ export class Client extends EventEmitter {
         return this._splitMessage(target, text);
     }
 
-    public whois(nick: string, callback?: (info: WhoisResponse) => void) {
+    public whois(nick: string, callback?: (info: WhoisResponse|null) => void) {
         if (typeof callback === 'function') {
-            const callbackWrapper = (info: WhoisResponse) => {
+            const callbackWrapper = (info: WhoisResponse|undefined) => {
+                // An empty info means we didn't get any whois information, resolve with null.
+                if (!info) {
+                    this.removeListener('whois', callbackWrapper);
+                    return callback(null);
+                }
                 if (info.nick.toLowerCase() === nick.toLowerCase()) {
                     this.removeListener('whois', callbackWrapper);
                     return callback(info);
