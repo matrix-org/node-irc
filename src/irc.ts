@@ -1300,12 +1300,13 @@ export class Client extends EventEmitter {
         if (!this.conn) {
             throw Error('Cannot send, not connected');
         }
-        let message: string|undefined;
+        let message = 'node-irc says goodbye';
         if (typeof (messageOrCallback) === 'function') {
             callback = messageOrCallback;
-            message = undefined;
         }
-        message = message || 'node-irc says goodbye';
+        else if (messageOrCallback) {
+            message = messageOrCallback;
+        }
         if (this.readyState() === 'open') {
             this._send('QUIT', message);
         }
