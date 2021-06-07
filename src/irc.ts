@@ -1082,13 +1082,13 @@ export class Client extends EventEmitter {
             this._send('PASS', this.opt.password);
         }
         if (this.opt.debug) {util.log('Sending irc NICK/USER');}
+        // Request capabilities.
+        // https://ircv3.net/specs/extensions/capability-negotiation.html
+        this._send('CAP LS', '302');
         this._send('NICK', this.nick);
         this.currentNick = this.nick;
         this._updateMaxLineLength();
         this._send('USER', this.opt.userName, '8', '*', this.opt.realName);
-        // Request capabilities.
-        // https://ircv3.net/specs/extensions/capability-negotiation.html
-        this._send('CAP LS', '302');
         this.emit('connect');
     }
 
