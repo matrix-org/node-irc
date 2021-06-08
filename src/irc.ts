@@ -351,7 +351,11 @@ export class Client extends EventEmitter {
             // If this connection is using SASL, we don't want to emit this until they are authenticated.
             this.emit('registered');
         }
-        this.whois(this.nick, (args) => {
+        this.whois(this.currentNick, (args) => {
+            if (!args) {
+                // TODO: We can't find our own nick, so do nothing here.
+                return
+            }
             this.currentNick = args.nick;
             this.hostMask = args.user + "@" + args.host;
             this._updateMaxLineLength();
@@ -1459,9 +1463,14 @@ export class Client extends EventEmitter {
         return this._splitMessage(target, text);
     }
 
-    public whois(nick: string, callback?: (info: WhoisResponse) => void) {
+    public whois(nick: string, callback?: (info: WhoisResponse|null) => void) {
         if (typeof callback === 'function') {
-            const callbackWrapper = (info: WhoisResponse) => {
+            const callbackWrapper = (info: WhoisResponse|undefined) => {
+                // An empty info means we didn't get any whois information, resolve with null.
+                if (!info) {
+                    this.removeListener('whois', callbackWrapper);
+                    return callback(null);
+                }
                 if (info.nick.toLowerCase() === nick.toLowerCase()) {
                     this.removeListener('whois', callbackWrapper);
                     return callback(info);
