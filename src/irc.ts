@@ -61,6 +61,7 @@ export interface WhoisResponse {
     operator?: string;
     account?: string;
     accountinfo?: string;
+    realHost?: string;
 }
 
 export interface IrcClientOpts {
@@ -955,6 +956,8 @@ export class Client extends EventEmitter {
             case 'rpl_whoisserver':
                 this._addWhoisData(message.args[1], 'server', message.args[2]);
                 return this._addWhoisData(message.args[1], 'serverinfo', message.args[3]);
+            case 'rpl_whoisactually':
+                return this._addWhoisData(message.args[1], 'realHost', message.args[2]);
             case 'rpl_whoisoperator':
                 return this._addWhoisData(message.args[1], 'operator', message.args[2]);
             case 'rpl_whoisaccount':
