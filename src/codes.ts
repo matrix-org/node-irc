@@ -249,6 +249,10 @@ export const replyCodes = {
         name: 'rpl_topicwhotime',
         type: 'reply'
     },
+    338: {
+        name: 'rpl_whoisactually',
+        type: 'reply'
+    },
     341: {
         name: 'rpl_inviting',
         type: 'reply'
