@@ -37,7 +37,7 @@ export function parseMessage(line: string, stripColors: boolean): Message {
     if (match) {
         message.prefix = match[1];
         line = line.replace(/^:[^ ]+ +/, '');
-        match = message.prefix.match(/^([_a-zA-Z0-9\[\]\\`^{}|-]*)(!([^@]+)@(.*))?$/);
+        match = message.prefix.match(/^([^!]+)(!([^@]+)@(.*))?$/);
         if (match) {
             message.nick = match[1];
             message.user = match[3];
