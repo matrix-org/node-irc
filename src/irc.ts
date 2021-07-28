@@ -85,7 +85,7 @@ export interface IrcClientOpts {
     certExpired?: boolean;
     floodProtection?: boolean;
     floodProtectionDelay?: number;
-    sasl?: boolean;
+    capabilities?: Set<string>;
     saslType?: 'PLAIN'|'EXTERNAL';
     stripColors?: boolean;
     channelPrefixes?: string;
@@ -127,7 +127,7 @@ interface IrcClientOptInternal extends IrcClientOpts {
     certExpired: boolean;
     floodProtection: boolean;
     floodProtectionDelay: number;
-    sasl: boolean;
+    capabilities: Set<string>;
     saslType: 'PLAIN'|'EXTERNAL';
     stripColors: boolean;
     channelPrefixes: string;
@@ -247,7 +247,7 @@ export class Client extends EventEmitter {
             certExpired: false,
             floodProtection: false,
             floodProtectionDelay: 1000,
-            sasl: false,
+            capabilities: new Set(),
             saslType: 'PLAIN',
             stripColors: false,
             channelPrefixes: '&#',
@@ -309,22 +309,22 @@ export class Client extends EventEmitter {
     }
 
     private onCapsList() {
-        const requiredCapabilites = [];
-        if (this.opt.sasl) {
-            requiredCapabilites.push('sasl');
-        }
-
-        if (requiredCapabilites.length === 0) {
+        if (this.opt.capabilities.size === 0) {
             // Don't bother asking for any capabilities.
             // We're finished checking for caps, so we can send an END.
             this._send('CAP', 'END');
             return;
         }
-        this.send('CAP REQ :', ...requiredCapabilites);
+
+        // Filter out caps that we specified but the server doesn't support
+        const capsToReq = Array(...this.opt.capabilities).filter((cap) => {
+            return this.capabilities.getServerCap(cap) !== undefined;
+        })
+        this.send('CAP REQ', capsToReq.join(' '));
     }
 
     private onCapsConfirmed() {
-        if (!this.opt.sasl) {
+        if (!this.capabilities.isCapEnabled('sasl')) {
             // We're not going to authenticate, so we can END.
             this.send('CAP', 'END');
             return;
@@ -1083,7 +1083,7 @@ export class Client extends EventEmitter {
         if (this.opt.webirc.ip && this.opt.webirc.pass && this.opt.webirc.host) {
             this._send('WEBIRC', this.opt.webirc.pass, this.opt.userName, this.opt.webirc.host, this.opt.webirc.ip);
         }
-        if (!this.opt.sasl && this.opt.password) {
+        if (!this.opt.capabilities.has('sasl') && this.opt.password) {
             // Legacy PASS command, use when not using sasl.
             this._send('PASS', this.opt.password);
         }
