@@ -87,6 +87,8 @@ export interface IrcClientOpts {
     floodProtectionDelay?: number;
     sasl?: boolean;
     saslType?: 'PLAIN'|'EXTERNAL';
+    saslUsername?: string|null;
+    saslPassword?: string|null;
     stripColors?: boolean;
     channelPrefixes?: string;
     messageSplit?: number;
@@ -129,6 +131,8 @@ interface IrcClientOptInternal extends IrcClientOpts {
     floodProtectionDelay: number;
     sasl: boolean;
     saslType: 'PLAIN'|'EXTERNAL';
+    saslUsername: string|null;
+    saslPassword: string|null;
     stripColors: boolean;
     channelPrefixes: string;
     messageSplit: number;
@@ -249,6 +253,8 @@ export class Client extends EventEmitter {
             floodProtectionDelay: 1000,
             sasl: false,
             saslType: 'PLAIN',
+            saslUsername: null,
+            saslPassword: null,
             stripColors: false,
             channelPrefixes: '&#',
             messageSplit: 512,
@@ -310,7 +316,7 @@ export class Client extends EventEmitter {
 
     private onCapsList() {
         const requiredCapabilites = [];
-        if (this.opt.sasl) {
+        if ((this.opt.sasl) && this.opt.saslUsername !== null && this.opt.saslPassword !== null) {
             requiredCapabilites.push('sasl');
         }
 
@@ -843,13 +849,16 @@ export class Client extends EventEmitter {
         if (message.args[0] !== '+') {
             return;
         }
+        if (!this.opt.saslUsername || !this.opt.saslPassword) {
+            return;
+        }
         switch (this.opt.saslType) {
             case 'PLAIN':
                 this._send('AUTHENTICATE',
                     Buffer.from(
-                        this.opt.userName + '\x00' +
-                        this.opt.userName + '\x00' +
-                        this.opt.password
+                        this.opt.saslUsername + '\x00' +
+                        this.opt.saslUsername + '\x00' +
+                        this.opt.saslPassword
                     ).toString('base64'));
                 break;
             case 'EXTERNAL':
