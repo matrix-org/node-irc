@@ -1,41 +1,12 @@
 import { Message } from "./parse_message";
 
-class Capabilities {
-    constructor(
-        public caps = new Set<string>(),
-        public saslTypes = new Set<string>(),
-        public ready = false,
-    ) {}
-
-    extend(messageArgs: string[]) {
-        let capabilityString = messageArgs[0];
-        // https://ircv3.net/specs/extensions/capability-negotiation.html#multiline-replies-to-cap-ls-and-cap-list
-        if (capabilityString === '*') {
-            capabilityString = messageArgs[1];
-        }
-        else {
-            this.ready = true;
-        }
-        const allCaps = capabilityString.trim().split(' ');
-        // Not all servers respond with the type of sasl supported.
-        const saslTypes = allCaps.find((s) => s.startsWith('sasl='))?.split('=')[1]
-            .split(',')
-            .map((s) => s.toUpperCase()) || [];
-        if (saslTypes) {
-            allCaps.push('sasl');
-        }
-
-        allCaps.forEach(c => this.caps.add(c));
-        saslTypes.forEach(t => this.saslTypes.add(t));
-    }
-}
-
 /**
  * A helper class to handle capabilities sent by the IRCd.
  */
 export class IrcCapabilities {
-    private serverCapabilites = new Capabilities();
-    private userCapabilites = new Capabilities();
+    private serverCapabilites: Map<string, string> = new Map();
+    private userCapabilites: Set<string> = new Set();
+    private ready = false;
 
     constructor(
         private readonly onCapsList: () => void,
@@ -43,15 +14,18 @@ export class IrcCapabilities {
 
     }
 
-    public get capsReady() {
-        return this.userCapabilites.ready;
+    public isCapEnabled(cap: string): boolean {
+        if (!this.ready) {
+            throw Error('Server caps response has not arrived yet');
+        }
+        return this.userCapabilites.has(cap);
     }
 
-    public get supportsSasl() {
-        if (!this.serverCapabilites.ready) {
-            throw Error('Server response has not arrived yet');
+    public getServerCap(cap: string): string|undefined {
+        if (!this.ready) {
+            throw Error('Server caps response has not arrived yet');
         }
-        return this.serverCapabilites.caps.has('sasl');
+        return this.serverCapabilites.get(cap);
     }
 
     /**
@@ -62,17 +36,19 @@ export class IrcCapabilities {
      * @returns True if supported, false otherwise.
      * @throws If the capabilites have not returned yet.
      */
-    public supportsSaslMethod(method: string, allowNoMethods=false) {
-        if (!this.serverCapabilites.ready) {
+    public supportsSaslMethod(method: string, allowNoMethods=false): boolean {
+        if (!this.ready) {
             throw Error('Server caps response has not arrived yet');
         }
-        if (!this.serverCapabilites.caps.has('sasl')) {
+        const saslString = this.serverCapabilites.get('sasl');
+        if (saslString === undefined) {
             return false;
         }
-        if (this.serverCapabilites.saslTypes.size === 0) {
+        if (saslString === '') {
             return allowNoMethods;
         }
-        return this.serverCapabilites.saslTypes.has(method.toUpperCase());
+        const saslTypes = saslString.split(',');
+        return saslTypes.includes(method.toLowerCase());
     }
 
     /**
@@ -82,22 +58,37 @@ export class IrcCapabilities {
         // E.g. CAP * LS :account-notify away-notify chghost extended-join multi-prefix
         // sasl=PLAIN,ECDSA-NIST256P-CHALLENGE,EXTERNAL tls account-tag cap-notify echo-message
         // solanum.chat/identify-msg solanum.chat/realhost
-        const [, subCmd, ...parts] = message.args;
-        if (subCmd === 'LS') {
-            this.serverCapabilites.extend(parts);
-
-            if (this.serverCapabilites.ready) {
-                // We now need to request user caps
+        if (message.args[1] === 'LS') {
+            const capsGiven = message.args.slice(-1);
+            if (capsGiven) {
+                const capArray = capsGiven[0].split(' ');
+                capArray.forEach(cap => {
+                    const firstEqualSign = cap.indexOf('=');
+                    if (firstEqualSign === -1) {
+                        this.serverCapabilites.set(cap, '');
+                    }
+                    else {
+                        const key = cap.substring(0, firstEqualSign);
+                        // Normalize this to lowercase to avoid casing problems between ircds
+                        const value = cap.substring(firstEqualSign+1).toLowerCase();
+                        this.serverCapabilites.set(key, value);
+                    }
+                })
+            }
+            // * as the penultimate parameter means there's more caps coming, so we wait to
+            // send the caps back until it's complete.
+            if (message.args.slice(-2, -1)[0] !== '*') {
+                this.ready = true;
                 this.onCapsList();
             }
         }
-        // The target might be * or the nickname, for now just accept either.
-        if (subCmd === 'ACK') {
-            this.userCapabilites.extend(parts);
-
-            if (this.userCapabilites.ready) {
-                this.onCapsConfirmed();
+        else if (message.args[1] === 'ACK') {
+            const capsGiven = message.args.slice(-1);
+            if (capsGiven) {
+                const acceptedCaps = capsGiven[0].split(' ');
+                acceptedCaps.forEach(cap => this.userCapabilites.add(cap));
             }
+            this.onCapsConfirmed();
         }
     }
 }
