@@ -129,8 +129,18 @@
 			"rawCommand": "324",
 			"commandType": "reply",
 			"args": ["nodebot", "#ubuntu", "+CLcntjf", "5:10", "#ubuntu-unregged"]
+		},
+		":emerson/matrix!~u@znkrci9cjw8y2.irc PRIVMSG #relaymsg-testing :testing relaymsg2": {
+			"prefix": "emerson/matrix!~u@znkrci9cjw8y2.irc",
+			"nick": "emerson/matrix",
+			"user": "~u",
+			"host": "znkrci9cjw8y2.irc",
+			"command": "PRIVMSG",
+			"rawCommand": "PRIVMSG",
+			"commandType": "normal",
+			"args": ["#relaymsg-testing", "testing relaymsg2"],
+			"stripColors": false
 		}
-
 	},
 	"_433before001": {
 		"sent": [

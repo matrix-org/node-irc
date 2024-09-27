@@ -36,11 +36,18 @@ export function parseMessage(line: string, stripColors: boolean): Message {
     if (match) {
         message.prefix = match[1];
         line = line.replace(/^:[^ ]+ +/, '');
-        match = message.prefix.match(/^([_a-zA-Z0-9\[\]\\`^{}|-]*)(!([^@]+)@(.*))?$/);
-        if (match) {
-            message.nick = match[1];
-            message.user = match[3];
-            message.host = match[4];
+        const userDelim = message.prefix.indexOf('!');
+        const hostDelim = message.prefix.indexOf('@');
+        if (userDelim !== -1 && hostDelim !== -1) {
+            message.nick = message.prefix.substring(0, userDelim);
+            message.user = message.prefix.substring(userDelim+1, hostDelim);
+            message.host = message.prefix.substring(hostDelim+1);
+        }
+        else if (userDelim === -1 && hostDelim !== -1) {
+            // I don't think we'll get here, but we could if someone sends user@server
+            message.nick = message.prefix.substring(0, hostDelim);
+            message.user = undefined;
+            message.host = message.prefix.substring(hostDelim+1);
         }
         else {
             message.server = message.prefix;
