@@ -63,6 +63,13 @@ export interface IrcClientOpts {
     floodProtectionDelay?: number;
     sasl?: boolean;
     saslType?: 'PLAIN'|'EXTERNAL';
+    /**
+     * The account name to authenticate as via SASL PLAIN. Defaults to the connecting nick, which
+     * is correct for most networks/services but not guaranteed to be true everywhere (a NickServ
+     * account name need not match the nick in use). Set this explicitly if your network's account
+     * name differs from the nick.
+     */
+    saslAccount?: string;
     stripColors?: boolean;
     channelPrefixes?: string;
     messageSplit?: number;
@@ -940,14 +947,23 @@ export class Client extends (EventEmitter as unknown as new () => TypedEmitter<C
             return;
         }
         switch (this.opt.saslType) {
-            case 'PLAIN':
+            case 'PLAIN': {
+                // SASL PLAIN payload is authzid\0authcid\0password. The identity to authenticate
+                // as must be the account being registered, not `opt.userName` (which is the
+                // separate IRC ident sent via USER) - using the ident here made servers that check
+                // the account name (e.g. Libera) reject the handshake with err_saslfail, even when
+                // the password was correct. The nick is the best default for this (and correct for
+                // most networks/services), but isn't guaranteed to match the actual account name,
+                // so allow it to be overridden via `saslAccount`.
+                const account = this.opt.saslAccount || this.nick;
                 this._send('AUTHENTICATE',
                     Buffer.from(
-                        this.opt.userName + '\x00' +
-                        this.opt.userName + '\x00' +
+                        account + '\x00' +
+                        account + '\x00' +
                         this.opt.password
                     ).toString('base64'));
                 break;
+            }
             case 'EXTERNAL':
                 this._send('AUTHENTICATE', '+');
                 break;
